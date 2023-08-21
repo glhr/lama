@@ -135,3 +135,23 @@ dmypy.json
 .vscode/
 ## vim
 *.sw?
+
+tb_logs/
+
+cat_dataset/
+
+cat_test_images/
+
+output/
+
+outputs/
+
+output_cats/
+
+LaMa_test_images/
+
+LaMa_models/
+
+experiments/
+
+*.zip

@@ -65,9 +65,10 @@ def main(predict_config: OmegaConf):
         dataset = make_default_val_dataset(predict_config.indir, **predict_config.dataset)
         for img_i in tqdm.trange(len(dataset)):
             mask_fname = dataset.mask_filenames[img_i]
+            img_fname = dataset.img_filenames[img_i]
             cur_out_fname = os.path.join(
                 predict_config.outdir, 
-                os.path.splitext(mask_fname[len(predict_config.indir):])[0] + out_ext
+                os.path.splitext(img_fname[len(predict_config.indir):])[0] + out_ext
             )
             os.makedirs(os.path.dirname(cur_out_fname), exist_ok=True)
             batch = default_collate([dataset[img_i]])
@@ -90,7 +91,11 @@ def main(predict_config: OmegaConf):
 
             cur_res = np.clip(cur_res * 255, 0, 255).astype('uint8')
             cur_res = cv2.cvtColor(cur_res, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(cur_out_fname, cur_res)
+            input_img = cv2.imread(img_fname)
+            out_img = input_img.copy()
+            mask = cv2.imread(mask_fname, cv2.IMREAD_GRAYSCALE)
+            out_img[mask == 255] = cur_res[mask == 255]
+            cv2.imwrite(cur_out_fname, out_img)
 
     except KeyboardInterrupt:
         LOGGER.warning('Interrupted by user')

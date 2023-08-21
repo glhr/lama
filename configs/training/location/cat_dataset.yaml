@@ -1,0 +1,3 @@
+data_root_dir: /media/gala/DataDisk1/2023_gala_ddsa/MissingDataChallenge/lama/cat_dataset/
+out_root_dir: /media/gala/DataDisk1/2023_gala_ddsa/MissingDataChallenge/lama/experiments/
+tb_dir: /media/gala/DataDisk1/2023_gala_ddsa/MissingDataChallenge/lama/tb_logs/

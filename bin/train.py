@@ -18,6 +18,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.plugins import DDPPlugin
 
+from saicinpainting.training.trainers import load_checkpoint
 from saicinpainting.training.trainers import make_training_model
 from saicinpainting.utils import register_debug_signal_handlers, handle_ddp_subprocess, handle_ddp_parent_process, \
     handle_deterministic_config
@@ -29,6 +30,8 @@ LOGGER = logging.getLogger(__name__)
 @hydra.main(config_path='../configs/training', config_name='tiny_test.yaml')
 def main(config: OmegaConf):
     try:
+        checkpoint_path = os.path.join(os.environ["PYTHONPATH"], "LaMa_models/lama-celeba-hq/lama-fourier/models/best.ckpt")
+
         need_set_deterministic = handle_deterministic_config(config)
 
         register_debug_signal_handlers()  # kill -10 <pid> will result in traceback dumped into log
@@ -48,6 +51,13 @@ def main(config: OmegaConf):
         metrics_logger.log_hyperparams(config)
 
         training_model = make_training_model(config)
+
+        import yaml
+        train_config_path = os.path.join(os.getcwd(), 'config.yaml')
+        with open(train_config_path, 'r') as f:
+            train_config = OmegaConf.create(yaml.safe_load(f))
+        
+        training_model = load_checkpoint(train_config, checkpoint_path, strict=False, map_location='cpu')
 
         trainer_kwargs = OmegaConf.to_container(config.trainer.kwargs, resolve=True)
         if need_set_deterministic:
